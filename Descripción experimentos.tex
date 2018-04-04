@@ -1,0 +1,231 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[version=3]{mhchem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{xcolor}
+\usepackage[stable]{footmisc}
+\usepackage[section]{placeins}
+
+%Paquetes necesarios para tablas
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xtab}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{colortab}
+\usepackage{booktabs}
+
+%Paquete para el manejo de las unidades
+\usepackage{siunitx}
+\sisetup{mode=text, output-decimal-marker = {,}, per-mode = symbol, qualifier-mode = phrase, qualifier-phrase = { de }, list-units = brackets, range-units = brackets, range-phrase = --}
+\usepackage{eurosym}
+\usepackage{cancel}
+
+%Paquetes necesarios para imágenes, pies de página, etc.
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{fancyhdr}
+\usepackage[left=4cm,right=2cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{pgf,tikz}
+\usepackage{mathrsfs}
+\usepackage{listings}
+
+%Instrucción para evitar la indentación
+\setlength\parindent{0pt}
+
+%Formato del título de las secciones
+
+\usepackage{titlesec}
+\usepackage{enumitem}
+\titleformat*{\section}{\bfseries\large}
+\titleformat*{\subsection}{\bfseries\normalsize}
+
+%Creación del ambiente anexos
+\usepackage{float}
+\floatstyle{plaintop}
+\newfloat{anexo}{thp}{anx}
+\floatname{anexo}{Anexo}
+\restylefloat{anexo}
+%\restylefloat{figure}
+
+%Modificación del formato de los captions
+\usepackage[margin=10pt,labelfont=bf]{caption}
+
+%Paquete para incluir comentarios
+\usepackage{todonotes}
+
+%Paquete para incluir hipervínculos
+\usepackage[colorlinks=true, 
+            linkcolor = blue,
+            urlcolor  = blue,
+            citecolor = black,
+            anchorcolor = blue]{hyperref}
+\definecolor{qqwuqq}{rgb}{0.,0.39215686274509803,0.}
+\definecolor{cqcqcq}{rgb}{0.7529411764705882,0.7529411764705882,0.7529411764705882}
+\definecolor{ffttww}{rgb}{1.,0.2,0.4}
+\definecolor{qqzzff}{rgb}{0.,0.6,1.}
+
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%Inicio del documento%
+%%%%%%%%%%%%%%%%%%%%%%
+
+	\lstset{language=Matlab,%
+	basicstyle=\ttfamily,
+	breaklines=true,%
+	morekeywords={matlab2tikz},
+	keywordstyle=\color{blue},%
+	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+	identifierstyle=\color{black},%
+	stringstyle=\color{mylilas},
+	commentstyle=\color{mygreen},%
+	showstringspaces=false,%without this there will be a symbol in the places where there is a space
+	numbers=left,%
+	numberstyle={\tiny \color{black}},% size of the numbers
+	numbersep=10pt, % this defines how far the numbers are from the text
+	emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+	%emph=[2]{word1,word2}, emphstyle=[2]{style},    
+}
+
+\begin{document}
+
+\renewcommand{\CancelColor}{\color{red}}
+
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash}m{#1}}
+
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash}m{#1}}
+
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash}m{#1}}
+
+\begin{center}
+	\textbf{\LARGE{Descripción Experimentos}}\\
+	\vspace{4cm}
+	\textbf{\large{Alba María Navarro Izquierdo
+			}}\\
+	\vspace{2cm}
+	\textbf{\large{Análisis y Simulación Numérica de Modelos Matemáticos con Procesos Biológicos de Quimiotaxis}}\\
+	\today
+\end{center}
+
+\vspace{7mm}
+\newpage
+
+\section{Introducción}
+
+En las siguientes secciones vamos a realizar experimentos numéricos mediante la aplicación del Método de los Elementos Finitos para el sistema de ecuaciones dado por el modelo clásico de Keller-Segel,
+
+\begin{equation}\def\arraystretch{2}
+\label{KSclasico}
+\left\{
+\begin{array}{lll}
+u_t=\Delta u -\chi\nabla\cdot( u\nabla v) &\quad& x\in\Omega, t>0\\
+v_t= \Delta v -v+u &\quad& x\in\Omega, t>0\\
+\dfrac{\partial u}{\partial \nu}=\dfrac{\partial v}{\partial \nu}=0 &\quad& x\in\partial\Omega, t>0\\
+u(x,0)=u_0(x), v(x,0)=v_0(x), &\quad& x\in\Omega
+\end{array}\right.
+\end{equation}
+
+Para ello primero hemos realizado una discretización en tiempo, para ahora realizar la discretización en espacio. Una vez hecha la semidiscretización en tiempo obtenemos el siguiente esquema general 
+\begin{equation}
+\left\{
+\begin{array}{lll}
+\label{KSSchgeneral}
+(1/k) u_{m+1} - \Delta u_{m+1} &= (1/k) u_m -  \nabla \cdot (u_{m+r_1} \nabla v_{m+r_2}),
+\\
+(1/k) v_{m+1} - \Delta v_{m+1} &= (1/k) v_m - v_{m+r_3} + u_{m+r_4},
+\end{array}
+\right.
+\end{equation}
+donde $r_1,r_2,r_3,r_4\in\{0,1\}$ y según los escojamos habrá términos implicitos o explícitos. Para los distintos valores de $r_i$ los esquemas tendrán diferentes características. 
+
+Los objetivos planteados son:  
+\begin{itemize}
+	\item Ver qué esquema aproxima mejor el tiempo de blow-up conjeturado en \cite{bib:2}.
+	\item Estudiar la positividad de solución en función de las bases utilizadas en el Método de los Elementos Finitos para un esquema en concreto (se usará el que aproxima mejor el tiempo de blow-up).
+	\item Estudiar para diferentes valores de $\chi$ y para diferentes esquemas cuándo se empiezan a producir las inestabilidades. 
+\end{itemize}
+
+\section{Experimento sobre el Blow-up A}
+\label{A}
+\subsection{Condiciones fijadas}
+En los siguientes experimentos vamos a tomar un dominio cuadrado $\Omega=[-\frac{1}{2},\frac{1}{2}]\times[-\frac{1}{2},\frac{1}{2}]$ y las siguientes condiciones iniciales para el Modelo \ref{KSclasico}:
+\begin{equation}
+u(x,y,0)=1000e^{-100(x^2+y^2)}, \quad v(x,y,0)=500e^{-50(x^2+y^2)}.
+\end{equation}
+Consideramos también la constante de sensitividad quimiotáctica como $\chi=1$, al igual que en el Ejemplo 1 del artículo \cite{bib:2}. Vamos a tomar un intervalo de tiempo $[0,10^{-4}]$ para lo cual tendremos un paso de $k=10^{-6}$ (número de iteraciones $N=100$). La malla tendrá una fineza de $n=102$. 
+
+\subsection{Objetivo y resultado esperado}
+El objetivo de este experimento es comparar los diferentes tipos de esquemas $(r_1,r_2,r_3,r_4)$ con $r_i\in\{0,1\}$ para $i=1,2,3,4$ para ver cuál aproxima mejor el tiempo de blow-up que se conjetura en \cite{bib:2}, que se encuentra en $t*\in[4.4\cdot 10^{-5},10^{-4}]$.
+
+\
+ 
+El resultado esperado es tener inestabilidades debido a la constante $\chi$, al igual que ocurre en el artículo al usar las diferencias finitas, en  aproximadamente tiempo $t=10^{-6}$ y $t=5\cdot 10^{-6}$. 
+
+\subsection{Resultados obtenidos}
+Obtenemos los siguientes resultados para los diferentes esquemas: 
+\begin{itemize}
+	
+	\item Para el esquema $(0,0,0,0)$ obtenemos que en el tiempo $t=4.2\cdot 10^{-5}$ el mínimo de $u$ empieza a ser negativo. Por lo tanto a partir de ahí no puede calcularse la energía. Hasta ese momento la energía va decreciendo. La integral de $u$ y de $v$ se mantiene constante. El mínimo de $v$ sin embargo se mantiene positivo siempre. 
+	
+	\item Para el esquema $(1,0,1,0)$ obtenemos que en el tiempo $t=3.8\cdot 10^{-5}$ el mínimo de $u$ empieza a ser negativo. Por lo tanto a partir de ahí no puede calcularse la energía. Hasta ese momento la energía va decreciendo. La integral de $u$ y de $v$ se mantiene constante. El mínimo de $v$ sin embargo se mantiene positivo siempre. 
+	
+	\item Para el esquema $(1,1,1,0)$ obtenemos que en el tiempo $t=3.8\cdot 10^{-5}$ el mínimo de $u$ empieza a ser negativo. Por lo tanto a partir de ahí no puede calcularse la energía. Hasta ese momento la energía va decreciendo. La integral de $u$ y de $v$ se mantiene constante. El mínimo de $v$ sin embargo se mantiene positivo siempre. 
+	
+\end{itemize}
+
+Vemos que el blow-up se produce antes en los esquemas más implícitos; sin embargo hay my poca diferencia entre $(0,0,0,0)$ y $(1,0,1,0)$, y cuando el blow-up se ve mucho mejor es en $(1,1,1,0)$.  
+
+\section{Experimento sobre el Blow-up B}
+\subsection{Condiciones fijadas}
+En los siguientes experimentos vamos a tomar un dominio cuadrado $\Omega=[-\frac{1}{2},\frac{1}{2}]\times[-\frac{1}{2},\frac{1}{2}]$ y las siguientes condiciones iniciales para el Modelo \ref{KSclasico}:
+\begin{equation}
+u(x,y,0)=1000e^{-100(x^2+y^2)}, \quad v(x,y,0)=0.
+\end{equation}
+Consideramos también la constante de sensitividad quimiotáctica como $\chi=1$, al igual que en el Ejemplo 1 del artículo \cite{bib:2}. Vamos a tomar un intervalo de tiempo $[0,0.5]$ para lo cual tendremos un paso de $k=5\cdot 10^{-3}$. 
+La malla en este caso es de $\Delta x=\Delta y=\dfrac{1}{101}$, es decir $N=102$. 
+\subsection{Objetivo y resultado esperado}
+El objetivo de este experimento es comparar los diferentes tipos de esquemas $(r_1,r_2,r_3,r_4)$ con $r_i\in\{0,1\}$ para $i=1,2,3,4$ para ver cuál aproxima mejor el tiempo de blow-up sabiendo que debe ocurrir antes de $t=0.4$ y que con las condiciones iniciales dadas debe ocurrir más tarde que en el experimento de la sección \ref{A}.
+
+\ 
+
+El resultado esperado es tener inestabilidades debido a la constante $\chi$, al igual que ocurre en el artículo al usar las diferencias finitas, en  aproximadamente tiempo $t=0.31345$ y $t=0.3135$. En diferencias finitas se obtiene además que el máximo de $u$ en tiempo $t=0.1$ es aproximadamente $529.4/541.5$.  
+
+\subsection{Resultados obtenidos}
+
+Obtenemos los siguientes resultados para los diferentes esquemas: 
+\begin{itemize}
+	
+	\item Para el esquema $(0,0,0,0)$ obtenemos que el máximo de $u$ decrece hasta $t=0.245$ que empieza a crecer, pero es un crecimiento muy lento. El mínimo de $u$ nunca es negativo, y la energía decrece y llega a ser negativa. La integral de $u$ se mantiene constante. 
+	
+	\item Para el esquema $(1,0,1,0)$ obtenemos que el máximo de $u$ decrece todo el tiempo. El mínimo crece, y nunca ed negativo. La energía decrece y llega a ser negativa. La integral de $u$ se mantiene constante. 
+	
+	\item Para el esquema $(1,1,1,0)$ obtenemos que el máximo de $u$ sufre inestabilidades a partir de $t=0.245$. El mínimo de $u$ comienza a crecer pero en $t=0.1$ decrece y llega a valores negativos, y luego sufre inestabilidades, por lo que la energía a veces se puede calcular y a veces no. La integral de $u$ se mantiene constante. 
+	
+\end{itemize}
+
+	No podemos deducir un patrón de comportamiento de la solución. 
+
+\section{Experimento sobre el Blow-up C}
+En los siguientes experimentos vamos a tomar un dominio cuadrado $\Omega=[-2,2]\times[-2,2]$ y las siguientes condiciones iniciales para el Modelo \ref{KSclasico}:
+\begin{equation}
+u(x,y,0)=1.15e^{-(x^2+y^2)}(4-x^2)^2(4-y^2)^2, \quad v(x,y,0)=0.55e^{-(x^2+y^2)}(4-x^2)^2(4-y^2)^2.
+\end{equation}
+Consideramos también la constante de sensitividad quimiotáctica como $\chi=0.2$, al igual que en el Ejemplo 1 del artículo \cite{bib:1}. Vamos a tomar un intervalo de tiempo $[0,0.03]$ para lo cual tendremos un paso de $k=10^{-4}$. 
+
+La malla que utilizamos es de $n=200$. 
+
+\begin{thebibliography}{99}
+	\bibitem{bib:1}
+	Viglialoro, Giuseppe and Marras, Monica and Antonietta Farina, Maria. \textit{On explicit lower bounds and blow-up times in a model of chemotaxis.}
+	\bibitem{bib:2}
+	Chertock, Alina and Kurganov, Alexander. \textit{A second-order positivity preserving central-upwind scheme for chemotaxis and haptotaxis models}
+\end{thebibliography}
+
+\end{document}

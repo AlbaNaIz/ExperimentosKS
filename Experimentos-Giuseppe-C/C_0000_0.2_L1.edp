@@ -1,0 +1,176 @@
+// ================================================
+// EXPERIMENT C 
+// ================================================
+
+// Time parameters
+// ------------------------------------------------
+
+real t=0; 			// Initial time
+real dt=1.e-4;		// Time step
+int N=200;			// Iterarions
+
+// Mesh 
+// ------------------------------------------------
+
+int n=200;									// x and y partition
+mesh Th=square(n, n, [4*x-2,4*y-2]);		// Omega
+
+// Chemotaxis paremeters
+// ------------------------------------------------
+
+real k1=0.2;
+real k2=1;
+real k3=0.1;
+real k4=1;
+
+// Initial conditions
+// ------------------------------------------------
+
+func initialU = 1.15*exp(-(x^2+y^2))*(4-x^2)^2*(4-y^2)^2;
+func initialV = 0.55*exp(-(x^2+y^2))*(4-x^2)^2*(4-y^2)^2;
+
+// Previous definitions
+// ------------------------------------------------
+
+fespace Vh(Th,P1);							// Definition of function space 
+Vh u, u0, bu; 								// Solution at t_{n+1}, t_n, test function.
+Vh v, v0, bv;								// Solution at t_{n+1}, t_n, test function.
+
+u0 = initialU;
+v0 = initialV;
+
+macro grad(u) [ dx(u), dy(u) ] // End of Macro
+
+
+// Storage vectors
+// ------------------------------------------------
+
+real[int] xx(N+1), yyumax(N+1),yyvmax(N+1),yyumin(N+1),yyvmin(N+1),integralv(N+1),integralu(N+1),energy(N+1); 
+
+// Vector initialization
+xx[0]=0;
+yyumax[0]=u0[].max;
+yyvmax[0]=v0[].max;
+yyumin[0]=u0[].min;
+yyvmin[0]=v0[].min;
+integralu[0]=int2d(Th)(u0);
+integralv[0]=int2d(Th)(v0);
+energy[0]=int2d(Th)(u0*log(u0)-u0*v0+0.5*grad(v0)'*grad(v0)+0.5*v0^2);
+
+
+// Variational problem (0,0,0,0)
+// ------------------------------------------------
+
+problem KellerSegelU(u,bu)=
+int2d(Th) (
+	u*bu/dt+grad(u)'*grad(bu))
+- int2d(Th)( 
+	u0*bu/dt 
+	+ k1*u0*grad(v0)'*grad(bu)
+	);
+
+problem KellerSegelV(v,bv) =
+	   int2d(Th)( 
+		  v*bv/dt 
+		  + k2*grad(v)'*grad(bv)
+		   )
+	  - int2d(Th)(
+		   v0*bv/dt 
+		   + k4*u0*bv 
+		   - k3*v0*bv
+		    );
+
+// Solve problems
+// ------------------------------------------------
+
+for (int k=1; k<=N; k++){
+	
+  t=t+dt; 
+  
+  KellerSegelV; // Solve Equation v
+  KellerSegelU; //Solve Equation u
+
+  u0 = u;  // For next iteration
+  v0 = v;  // For next iteration
+
+  plot(u, value=1, fill=1, dim=3);
+
+  // Store Data
+  xx[k]=dt*k;
+  yyumax[k]=u0[].max;
+  yyvmax[k]=v0[].max;
+  yyumin[k]=u0[].min;
+  yyvmin[k]=v0[].min;
+  integralu[k]=int2d(Th)(u0);
+  integralv[k]=int2d(Th)(v0);
+  energy[k]=int2d(Th)(u0*log(u0)-u0*v0+0.5*grad(v0)'*grad(v0)+0.5*v0^2);
+  
+}
+
+// Output files for gnuplot
+// ------------------------------------------------
+
+{ // Maximum of V
+
+ofstream file("C_0000_0.2_L1_MAXV.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << yyvmax[i] << endl;
+}
+}
+ 
+{ // Maximum of U
+ofstream file("C_0000_0.2_L1_MAXU.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << yyumax[i] << endl;
+}
+} 
+
+{ // Minimum of V
+ofstream file("C_0000_0.2_L1_MINV.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << yyvmin[i] << endl;
+}
+}
+ 
+{ // Minimum of U
+ofstream file("C_0000_0.2_L1_MINU.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << yyumin[i] << endl;
+}
+}
+  
+  
+{ // Integrate of U
+ofstream file("C_0000_0.2_L1_INTU.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << integralu[i] << endl;
+}
+}
+
+{ // Integrate of V
+ofstream file("C_0000_0.2_L1_INTV.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << integralv[i] << endl;
+}
+}
+
+{ // Energy
+ofstream file("C_0000_0.2_L1_ENERGY.txt");
+file.precision(10);
+for (int i=0;i<=N;i++)
+{
+	file << xx[i] << " " << energy[i] << endl;
+}
+}
